@@ -1,5 +1,7 @@
 
-My humble works for [tidytuesday](https://github.com/rfordatascience/tidytuesday)
+My humble works for [tidytuesday](https://github.com/rfordatascience/tidytuesday). R is cool ya'll! Especially if you utilize tidyverse.
+
+My goal here is to learn something with each entry and push my ability to creatively visualize data.
 
 ### Hats off to:
 1. All of the lovely submissions I see every week!
