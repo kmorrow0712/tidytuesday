@@ -1,0 +1,136 @@
+---
+title: "tidytuesday-2020-08-18"
+author: "Kelly Morrow"
+date: "8/17/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# load packages
+library(tidyverse)
+library(tidytext)
+library(futurevisions)
+library(showtext)
+
+
+# get 8-18-2020 data:
+tuesdata <- tidytuesdayR::tt_load('2020-08-18')
+plants <- tuesdata$plants
+threats <- tuesdata$threats
+actions <- tuesdata$actions
+
+```
+
+```{r}
+# load fonts
+font_add_google(name = "Roboto Slab", family = "roboto")
+showtext_auto()
+
+#Pick a palette!
+show_palette("grand_tour")
+show_palette("cancri")
+```
+```{r}
+grandtour_palette <- c("#73224E", "#AD2E37", "#E37D41","#E9A144","#F6EBD1","#418D87","#2B5E3D")
+cancri_palette <- c("#343854", "#8C384D", "#CF2438", "#D95E31","#F0C742","#F8F0E5")
+```
+
+
+```{r}
+plants %>%
+  group_by(continent, year_last_seen) %>%
+  select(continent, year_last_seen, red_list_category) %>%
+  filter(red_list_category == "Extinct") %>%
+  mutate(count = n()) %>%
+  drop_na() %>%
+  mutate(year_last_seen = factor(year_last_seen,
+                                 levels = c("Before 1900",
+                                         "1900-1919",
+                                         "1920-1939",
+                                         "1940-1959",
+                                          "1960-1979",
+                                          "1980-1999",
+                                          "2000-2020"))) %>%
+  distinct() %>%
+  ggplot(aes(x = continent, y = count, fill = forcats::fct_rev(year_last_seen))) +
+  labs(y = NULL, x = NULL, fill = NULL,
+       title = "Plant Extinctions by Continent") +
+   geom_bar(stat = "identity", position = "stack", color = "#504845", size = .65) +
+  scale_y_continuous(expand = c(0,1)) +
+  coord_flip() +
+  scale_fill_manual(values = grandtour_palette) +
+  theme(
+    text = element_text(family = "roboto"),
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major.x = element_line(color = "#BCAAA4"),
+    panel.grid.minor.x = element_line(color = "#BCAAA4"),
+    panel.grid.major.y = element_blank(),
+    legend.position = c(.856, .7),
+    legend.key = element_rect(color = "#BCAAA4", fill = "#D7CCC8"),
+    legend.background = element_rect(color = "#BCAAA4", fill = "white"),
+    legend.text = element_text(size = 10),
+    axis.line.x.bottom = element_line(color = "#BCAAA4", size = .75),
+    axis.text.x = element_text(size = 11),
+    axis.line.y.left = element_line(color = "#BCAAA4", size = .75),
+    axis.ticks.y = element_blank(),
+    axis.text.y = element_text(size = 12),
+    title = element_text(size = 17)
+  )
+```
+
+```{r}
+
+plants %>%
+  drop_na() %>%
+  group_by(continent, year_last_seen) %>%
+  select(continent, red_list_category, year_last_seen) %>%
+  mutate(year_count = n()) %>%
+  mutate(year_last_seen = factor(year_last_seen,
+                                 levels = c("Before 1900",
+                                         "1900-1919",
+                                         "1920-1939",
+                                         "1940-1959",
+                                          "1960-1979",
+                                          "1980-1999",
+                                          "2000-2020"))) %>%
+ distinct() %>%
+ ggplot() +
+ geom_linerange(aes(x = continent, ymin = 0, ymax = year_count,  group = year_last_seen),
+            position = position_dodge(width = .65),
+            linetype = "dashed") +
+   geom_point(aes(x = continent, y = year_count, group = year_last_seen, color = year_last_seen),
+            position = position_dodge(width = .65),
+            size = 4.5,
+            shape = 20) +
+  labs(y = "Number of Plants", title = "Plant extinctions last seen this century") +
+  scale_y_continuous(expand = c(-0.01,1), limits = c(0, 60)) +
+  scale_color_manual(values = grandtour_palette) +
+  guides(color = guide_legend(override.aes = list(size = 3), nrow = 1))+
+  theme(
+    text = element_text(family = "roboto"),
+    panel.background = element_rect(fill = "white"),
+    legend.key = element_rect(color = "transparent", fill = "transparent"),
+    legend.background = element_rect(color = "transparent", fill = "transparent"),
+    legend.text = element_text(size = 8),
+    legend.spacing.x = unit(.05, 'mm'),
+    legend.spacing.y = unit(-.5, 'mm'),
+    legend.title = element_blank(),
+    legend.position = 'top',
+    axis.ticks.x = element_blank(),
+    axis.line.x.bottom = element_line(color = "#BCAAA4", size = .75),
+    axis.text.x = element_text(size = 11),
+    axis.title.x = element_blank(),
+    axis.line.y.left = element_line(color = "#BCAAA4", size = .75),
+    axis.text.y = element_text(size = 10),
+    axis.title.y = element_text(size = 14),
+    title = element_text(size = 17, margin=margin(0,0,30,0))
+  )
+
+ggsave('tidytuesday_8-18-2020.jpeg')
+```
+
+
+
+
