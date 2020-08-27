@@ -1,0 +1,98 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+
+
+library(tidytuesdayR)
+library(tidyverse)
+library(viridis)
+library(ggwordcloud)
+
+tuesdata <- tidytuesdayR::tt_load('2020-08-25')
+tuesdata <- tidytuesdayR::tt_load(2020, week = 35)
+chopped <- tuesdata$chopped
+
+
+```
+
+```{r}
+
+# ratings & episode (nice correlation plot)
+
+# show season mean as well as individual data and/or variability
+
+
+
+df <- chopped %>% 
+  #drop_na() %>%
+  group_by(season) %>% 
+  mutate(season_avg = mean(episode_rating, na.rm = TRUE))
+
+ggplot(df, aes(x = factor(season), y = episode_rating, fill = season)) +
+annotate(geom="text", x=24.5, y= 6.1, label="S29E13: Worst Cooks Challenge",
+            color="red",
+            hjust = .5,
+           size = 3) +
+  annotate("segment",
+           x=25, 
+           xend = 28.5,
+           y = 6,
+           yend = 5.52,
+           color = "black",
+           arrow = arrow(type = "closed",
+                         length = unit(0.03, "npc"))) +
+  labs(x = "Season", y = "IMDb rating", title = "Chopped IMDb ratings over 45 seasons (2011 - 2020)") +
+    geom_jitter(aes(group = season, color = season),
+              size = 1.7,
+              width = .05,
+              alpha = .6) +
+  geom_boxplot(outlier.shape = NA, 
+               alpha = .6, 
+               width = 1, 
+               size = .3) + 
+  stat_summary(fun=mean, 
+               geom="point", 
+               shape=23, 
+               size=1.5, 
+               color= "black",
+               fill = "black") +
+  scale_x_discrete(breaks = seq(from = 0, to = 45, by = 5)) +
+  scale_color_viridis(option = "magma", direction = -1) +
+  scale_fill_viridis(option = "magma", direction = -1) +
+  theme(
+    panel.background = element_rect(fill = "white"),
+    legend.position = "none",
+    plot.title = element_text(size = 16),
+    axis.line.x = element_line(color = "black"),
+    axis.line.y = element_line(color = "black"),
+    axis.ticks = element_blank(),
+    axis.title.x = element_text(size = 14),
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 12),
+    axis.title.y = element_text(size = 14)
+  )
+   
+ggsave('test.jpeg')
+
+```
+
+```{r}
+
+chopped %>%
+  separate(appetizer,
+           into = c("app_first","app_second","app_third"),
+           sep = ",") %>%
+  separate(entree,
+           into = c("entree_first","entree_second","entree_third","entree_four","entree_five"),
+           sep = ",") %>%
+  separate(dessert,
+           into = c("dessert_first","dessert_second","dessert_third","dessert_four","dessert_five")) %>%
+  drop_na() %>%
+  gather(course, food_item, app_first:dessert_five) %>%
+  mutate(count = n()) 
+
+```
+
